@@ -36,12 +36,12 @@ public class Riviste extends CatalogoBibliotecario {
 
     @Override
     public String toString() {
-        return "Riviste{ " +
+        return
                 "periodicità di Pubblicazione: " + periodicità +
-                ", cod.ISBN: " + ISBN +
-                ", titolo': " + Titolo + '\'' +
-                ", anno di Pubblicazione: " + annoPubblicazione +
-                ", numero di Pagine: " + numeroPagine +
-                '}';
+                        ", cod.ISBN: " + ISBN +
+                        ", Titolo': " + Titolo + '\'' +
+                        ", anno di Pubblicazione: " + annoPubblicazione +
+                        ", numero di Pagine: " + numeroPagine +
+                        '}';
     }
 }

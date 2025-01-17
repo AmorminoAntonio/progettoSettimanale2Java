@@ -1,8 +1,5 @@
 package catalogoBibliotecario;
 
-import com.github.javafaker.Faker;
-
-import java.util.Locale;
 import java.util.Objects;
 
 public class Libri extends CatalogoBibliotecario {
@@ -47,13 +44,13 @@ public class Libri extends CatalogoBibliotecario {
 
     @Override
     public String toString() {
-        return "Libri{ " +
+        return
                 "autore:' " + autore + '\'' +
-                ", genere:' " + genere + '\'' +
-                ", cod.ISBN: " + ISBN +
-                ", titolo:' " + Titolo + '\'' +
-                ", anno di pubblicazione: " + annoPubblicazione +
-                ", numero di Pagine: " + numeroPagine +
-                '}';
+                        ", genere:' " + genere + '\'' +
+                        ", cod.ISBN: " + ISBN +
+                        ", Titolo:' " + Titolo + '\'' +
+                        ", anno di pubblicazione: " + annoPubblicazione +
+                        ", numero di Pagine: " + numeroPagine +
+                        '}';
     }
 }

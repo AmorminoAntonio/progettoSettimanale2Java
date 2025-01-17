@@ -1,6 +1,5 @@
 package catalogoBibliotecario;
 
-
 import java.util.Objects;
 
 public abstract class CatalogoBibliotecario {
@@ -8,6 +7,7 @@ public abstract class CatalogoBibliotecario {
     protected String Titolo;
     protected int annoPubblicazione;
     protected int numeroPagine;
+
 
 
     public CatalogoBibliotecario(int ISBN, String titolo, int annoPubblicazione, int numeroPagine) {
@@ -30,7 +30,7 @@ public abstract class CatalogoBibliotecario {
     }
 
     public void setTitolo(String titolo) {
-        Titolo = titolo;
+        this.Titolo = titolo;
     }
 
     public int getAnnoPubblicazione() {
@@ -65,7 +65,7 @@ public abstract class CatalogoBibliotecario {
     public String toString() {
         return "CatalogoBibliotecario{ " +
                 "cod.ISBN: " + ISBN +
-                ", titolo:' " + Titolo + '\'' +
+                ", Titolo:' " + Titolo + '\'' +
                 ", anno di Pubblicazione: " + annoPubblicazione +
                 ", numero di Pagine: " + numeroPagine +
                 '}';
