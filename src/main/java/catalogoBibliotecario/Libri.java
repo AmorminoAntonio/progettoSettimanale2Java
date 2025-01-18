@@ -44,13 +44,12 @@ public class Libri extends CatalogoBibliotecario {
 
     @Override
     public String toString() {
-        return
+        return "LIBRO: " +
                 "autore:' " + autore + '\'' +
-                        ", genere:' " + genere + '\'' +
-                        ", cod.ISBN: " + ISBN +
-                        ", Titolo:' " + Titolo + '\'' +
-                        ", anno di pubblicazione: " + annoPubblicazione +
-                        ", numero di Pagine: " + numeroPagine +
-                        '}';
+                ", genere:' " + genere + '\'' +
+                ", cod.ISBN: " + ISBN +
+                ", Titolo:' " + Titolo + '\'' +
+                ", anno di pubblicazione: " + annoPubblicazione +
+                ", numero di Pagine: " + numeroPagine;
     }
 }

@@ -63,7 +63,7 @@ public abstract class CatalogoBibliotecario {
 
     @Override
     public String toString() {
-        return "CatalogoBibliotecario{ " +
+        return "CATALOGO BIBLIOTECARIO: { " +
                 "cod.ISBN: " + ISBN +
                 ", Titolo:' " + Titolo + '\'' +
                 ", anno di Pubblicazione: " + annoPubblicazione +

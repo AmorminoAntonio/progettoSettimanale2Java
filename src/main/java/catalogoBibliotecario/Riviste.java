@@ -13,12 +13,13 @@ public class Riviste extends CatalogoBibliotecario {
         this.periodicità = (PeriodicitàPubblicazione) periodicitàPubblicazione;
     }
 
-    public Enum<PeriodicitàPubblicazione> getPeriodicità() {
+
+    public PeriodicitàPubblicazione getPeriodicità() {
         return periodicità;
     }
 
-    public void setPeriodicità(Enum<PeriodicitàPubblicazione> periodicità) {
-        this.periodicità = (PeriodicitàPubblicazione) periodicità;
+    public void setPeriodicità(PeriodicitàPubblicazione periodicità) {
+        this.periodicità = periodicità;
     }
 
     @Override
@@ -36,12 +37,12 @@ public class Riviste extends CatalogoBibliotecario {
 
     @Override
     public String toString() {
-        return
+        return "RIVISTA: " +
                 "periodicità di Pubblicazione: " + periodicità +
-                        ", cod.ISBN: " + ISBN +
-                        ", Titolo': " + Titolo + '\'' +
-                        ", anno di Pubblicazione: " + annoPubblicazione +
-                        ", numero di Pagine: " + numeroPagine +
-                        '}';
+                ", cod.ISBN: " + ISBN +
+                ", Titolo': " + Titolo + '\'' +
+                ", anno di Pubblicazione: " + annoPubblicazione +
+                ", numero di Pagine: " + numeroPagine +
+                '}';
     }
 }

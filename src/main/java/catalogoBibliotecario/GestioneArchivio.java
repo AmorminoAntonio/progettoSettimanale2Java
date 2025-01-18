@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public class GestioneArchivio {
@@ -22,12 +24,63 @@ public class GestioneArchivio {
 
 
         System.out.println("catalogo bibliotecario: ");
-        generaRiviste();
         generaBooks();
+        generaRiviste();
+        stampaCatalogo();
 
-        StampaCatalogo();
+        while (true) {
+            System.out.println("\nseleziona la funziona da svolgere: ");
+            System.out.println("1: cerca con ISBN,2: cerca tramite AUTORE,3: cerca tramite ANNO di PUBBLICAZIONE,4: aggiungi un elemento,5: rimuovi un elemento,6: vedi STATISTICHE");
+            System.out.println("7: vedi totale pagine libri e riviste, 8: vedi catalogo");
+            int scelta = sc.nextInt();
+
+            if (scelta == 0) {
+                System.out.println("programma terminato.");
+                sc.close();
+                break;
+            } else {
+                switch (scelta) {
+                    case 1:
+                        System.out.print("inserisci cod.ISBN: ");
+                        ricercaPerISBN(sc.nextInt());
+                        break;
+                    case 2:
+                        System.out.print("inserisci l'autore: ");
+                        sc.nextLine();
+                        ricercaPerAutore(sc.nextLine());
+                        break;
+                    case 3:
+                        System.out.print("inserisci l'anno di pubblicazione: ");
+                        ricercaPerPubblicazione(sc.nextInt());
+                        break;
+                    case 4:
+                        System.out.println("Vamos, crea l'elemento...");
+                        sc.nextLine();
+                        aggiungiElementoSenzaDuplicati();
+                        break;
+                    case 5:
+                        System.out.println("inserisci il cod.ISBN: ");
+                        rimuoviTramiteIsbn(sc.nextInt());
+                        aggiornaCatalogo();
+                        break;
+                    case 6:
+                        sc.nextLine();
+                        break;
+                    case 7:
+                        stampaNumeroPagine();
+                        break;
+                    case 8:
+                        stampaCatalogo();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
 
 
+
+/*
         System.out.println("inerisci l'autore per ricercare: ");
         ricercaPerAutore(sc.nextLine().toLowerCase().trim());
 
@@ -37,7 +90,12 @@ public class GestioneArchivio {
 
 
         System.out.println("inserisci l'anno di pubblicazione per ricercare: ");
-        ricercaPerPubblicazione(sc.nextInt());
+        ricercaPerPubblicazione(sc.nextInt());*/
+
+
+        /*System.out.println("inserisci il cod ISBN per rimuovere l'elemento: ");
+        rimuoviTramiteIsbn(sc.nextInt());
+        stampaCatalogo();*/
 
 
     }
@@ -54,7 +112,6 @@ public class GestioneArchivio {
         Libri libro8 = new Libri(58, fakeData.book().title(), 1400, fakeData.number().numberBetween(30, 600), "chiara tenaglia", fakeData.book().genre());
 
         listaLibri.addAll(Arrays.asList(libro1, libro2, libro3, libro4, libro5, libro6, libro7, libro8));
-
     }
 
 
@@ -71,11 +128,14 @@ public class GestioneArchivio {
         listaRiviste.addAll(Arrays.asList(rivista1, rivista2, rivista3, rivista4, rivista5, rivista6, rivista7, rivista8));
     }
 
-    public static void StampaCatalogo() {
+    public static void stampaCatalogo() {
         catalogoProdotti.addAll(listaLibri);
         catalogoProdotti.addAll(listaRiviste);
-
-        catalogoProdotti.forEach(System.out::println);
+        if (catalogoProdotti.isEmpty()) {
+            System.out.println("Mi dispiace, il tuo catalogo è vuoto !");
+        } else {
+            catalogoProdotti.forEach(System.out::println);
+        }
     }
 
 
@@ -109,10 +169,10 @@ public class GestioneArchivio {
             Libri libro = new Libri(isbn, titolo, annoPubblicazione, numeroPagine, autore, genere);
 
 
-            boolean isDuplicate = listaLibri.stream()
-                    .anyMatch(l -> l.getISBN() == libro.getISBN());
+            boolean giàEsistente = listaLibri.stream()
+                    .anyMatch(book -> book.getISBN() == libro.getISBN());
 
-            if (isDuplicate) {
+            if (giàEsistente) {
                 System.out.println("Libro con ISBN " + isbn + " già presente.");
             } else {
                 listaLibri.add(libro);
@@ -136,16 +196,16 @@ public class GestioneArchivio {
             sc.nextLine();
 
             System.out.print("Inserisci periodicità (Settimanale, Mensile, Semestrale): ");
-            String periodicitaInput = sc.nextLine();
-            PeriodicitàPubblicazione periodicità = PeriodicitàPubblicazione.valueOf(periodicitaInput);
+            String periodicita = sc.nextLine();
+            PeriodicitàPubblicazione periodicità = PeriodicitàPubblicazione.valueOf(periodicita);
 
             Riviste rivista = new Riviste(isbn, titolo, annoPubblicazione, numeroPagine, periodicità);
 
 
-            boolean isDuplicate = listaRiviste.stream()
-                    .anyMatch(r -> r.getISBN() == rivista.getISBN());
+            boolean giàEsistente = listaRiviste.stream()
+                    .anyMatch(riviste -> riviste.getISBN() == rivista.getISBN());
 
-            if (isDuplicate) {
+            if (giàEsistente) {
                 System.out.println("Rivista con ISBN " + isbn + " già presente.");
             } else {
                 listaRiviste.add(rivista);
@@ -160,7 +220,7 @@ public class GestioneArchivio {
     public static void ricercaPerPubblicazione(int annoDiPubblicazione) {
         catalogoProdotti.stream()
                 .filter(catalogoBibliotecario -> catalogoBibliotecario.getAnnoPubblicazione() == annoDiPubblicazione)
-                .peek(catalogo -> System.out.println("Prodotto trovato: " + catalogo))
+                .peek(elemCatalogo -> System.out.println("Prodotto trovato: " + elemCatalogo))
                 .findFirst()
                 .orElseGet(() -> {
                     System.out.println("Nessun prodotto trovato con anno di pubblicazione " + annoDiPubblicazione);
@@ -172,12 +232,11 @@ public class GestioneArchivio {
     public static void ricercaPerISBN(int isbn) {
         catalogoProdotti.stream()
                 .filter(catalogoBibliotecario -> catalogoBibliotecario.getISBN() == isbn)
-                .peek(catalogo -> System.out.println("prodotto trovato: " + catalogo))
                 .findFirst()
-                .orElseGet(() -> {
-                    System.out.println("Nessun libro trovato con ISBN " + isbn);
-                    return null;
-                });
+                .ifPresentOrElse(
+                        catalogoBibliotecario -> System.out.println("prodotto trovato: " + catalogoBibliotecario),
+                        () -> System.out.println("Nessun libro trovato con ISBN " + isbn)
+                );
     }
 
 
@@ -191,9 +250,44 @@ public class GestioneArchivio {
                 );
     }
 
+    //DA RIVEDERE PERCHE' MI DUPLICA LA LISTA CATALOGO PRODOTTI
+    public static void rimuoviTramiteIsbn(int codiceProd) {
+        catalogoProdotti.stream()
+                .filter(catalogoBibliotecario -> catalogoBibliotecario.getISBN() == codiceProd)
+                .findFirst()
+                .ifPresentOrElse(
+                        elem -> {
+                            catalogoProdotti.removeIf(p -> elem.getISBN() == codiceProd);
+                            System.out.println("Elemento con ISBN " + codiceProd + " rimosso con successo.");
+                        },
+                        () -> System.out.println("Rimozione dell'elemento con codice ISBN " + codiceProd + " non avvenuta correttamente !")
+                );
+        aggiornaCatalogo();
+    }
 
-    public static void rimuoviTramiteIsbn() {
+    public static void aggiornaCatalogo() {
+        catalogoProdotti = Stream.concat(listaLibri.stream(), listaRiviste.stream())
+                .collect(Collectors.toList());
+        catalogoProdotti.forEach(System.out::println);
+    }
 
+    public static void sommaPagineLibri() {
+        int sum = listaLibri.stream()
+                .mapToInt(Libri::getNumeroPagine)
+                .sum();
+        System.out.println("n° pagine totali dei libri in catalogo: " + sum + " " + "pagine");
+    }
+
+    public static void sommaPagineRiviste() {
+        int sum = listaRiviste.stream()
+                .mapToInt(Riviste::getNumeroPagine)
+                .sum();
+        System.out.println("n° pagine totali delle riviste in catalogo: " + sum + " " + "pagine");
+    }
+
+    public static void stampaNumeroPagine() {
+        sommaPagineLibri();
+        sommaPagineRiviste();
     }
 
 
