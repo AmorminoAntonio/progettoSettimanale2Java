@@ -20,10 +20,8 @@ public class GestioneArchivio {
 
     public static void main(String[] args) {
 
-
-        System.out.println("catalogo bibliotecario: ");
+// qui genero il catalogo ma non lo stampo ancora a video.
         generaCatalogo();
-        stampaCatalogo();
 
 
         while (true) {
@@ -295,113 +293,119 @@ public class GestioneArchivio {
         int IsbnCercato = sc.nextInt();
         sc.nextLine();
 
-        Optional<CatalogoBibliotecario> elementoDaModificare = catalogoProdotti.stream()
-                .filter(catalogoBibliotecario -> catalogoBibliotecario.getISBN() == IsbnCercato)
-                .findFirst();
+        try {
+            CatalogoBibliotecario prodottoDaModificare = catalogoProdotti.stream()
+                    .filter(catalogoBibliotecario -> catalogoBibliotecario.getISBN() == IsbnCercato)
+                    .findFirst()
+                    .orElseThrow(() -> new elementoNonEsistente("Nessun prodotto trovato con ISBN " + IsbnCercato));
 
-        CatalogoBibliotecario prodottoModificato = elementoDaModificare
-                .orElseThrow(() -> new elementoNonEsistente("Nessun prodotto trovato con ISBN " + IsbnCercato));
+            switch (prodottoDaModificare) {
+                case Libri libro:
+                    System.out.println("Elemento trovato: " + libro);
+                    System.out.println("Modifica le proprietà del libro:");
 
-        switch (prodottoModificato) {
-            case Libri libro:
-                System.out.println("Elemento trovato: " + libro);
-                System.out.println("Modifica le proprietà del libro:");
+                    System.out.print("Nuovo titolo (corrente: " + libro.getTitolo() + "): ");
+                    String nuovoTitolo = sc.nextLine();
+                    libro.setTitolo(nuovoTitolo);
 
-                System.out.print("Nuovo titolo (corrente: " + libro.getTitolo() + "): ");
-                String nuovoTitolo = sc.nextLine();
-                libro.setTitolo(nuovoTitolo);
+                    System.out.print("Nuovo anno di pubblicazione (corrente: " + libro.getAnnoPubblicazione() + "): ");
+                    int nuovoAnno = sc.nextInt();
+                    libro.setAnnoPubblicazione(nuovoAnno);
+                    sc.nextLine();
 
-                System.out.print("Nuovo anno di pubblicazione (corrente: " + libro.getAnnoPubblicazione() + "): ");
-                int nuovoAnno = sc.nextInt();
-                libro.setAnnoPubblicazione(nuovoAnno);
-                sc.nextLine();
+                    System.out.print("Nuovo numero di pagine (corrente: " + libro.getNumeroPagine() + "): ");
+                    int nuovePagine = sc.nextInt();
+                    libro.setNumeroPagine(nuovePagine);
+                    sc.nextLine();
 
-                System.out.print("Nuovo numero di pagine (corrente: " + libro.getNumeroPagine() + "): ");
-                int nuovePagine = sc.nextInt();
-                libro.setNumeroPagine(nuovePagine);
-                sc.nextLine();
+                    System.out.print("Nuovo autore (corrente: " + libro.getAutore() + "): ");
+                    String nuovoAutore = sc.nextLine();
+                    libro.setAutore(nuovoAutore);
 
-                System.out.print("Nuovo autore (corrente: " + libro.getAutore() + "): ");
-                String nuovoAutore = sc.nextLine();
-                libro.setAutore(nuovoAutore);
+                    System.out.print("Nuovo genere (corrente: " + libro.getGenere() + "): ");
+                    String nuovoGenere = sc.nextLine();
+                    libro.setGenere(nuovoGenere);
 
-                System.out.print("Nuovo genere (corrente: " + libro.getGenere() + "): ");
-                String nuovoGenere = sc.nextLine();
-                libro.setGenere(nuovoGenere);
+                    log.info("Modifica del libro avvenuta con successo!");
+                    System.out.println("Libro modificato: " + libro);
+                    break;
 
-                log.info("Modifica del libro avvenuta con successo!");
-                System.out.println("Libro modificato: " + libro);
-                break;
+                case Riviste rivista:
+                    System.out.println("Elemento trovato: " + rivista);
+                    System.out.println("Modifica le proprietà della rivista:");
 
-            case Riviste rivista:
-                System.out.println("Elemento trovato: " + rivista);
-                System.out.println("Modifica le proprietà della rivista:");
+                    System.out.print("Nuovo titolo (corrente: " + rivista.getTitolo() + "): ");
+                    String nuovoTitoloRivista = sc.nextLine();
+                    rivista.setTitolo(nuovoTitoloRivista);
 
-                System.out.print("Nuovo titolo (corrente: " + rivista.getTitolo() + "): ");
-                String nuovoTitoloRivista = sc.nextLine();
-                rivista.setTitolo(nuovoTitoloRivista);
+                    System.out.print("Nuovo anno di pubblicazione (corrente: " + rivista.getAnnoPubblicazione() + "): ");
+                    int nuovoAnnoRivista = sc.nextInt();
+                    rivista.setAnnoPubblicazione(nuovoAnnoRivista);
+                    sc.nextLine();
 
-                System.out.print("Nuovo anno di pubblicazione (corrente: " + rivista.getAnnoPubblicazione() + "): ");
-                int nuovoAnnoRivista = sc.nextInt();
-                rivista.setAnnoPubblicazione(nuovoAnnoRivista);
-                sc.nextLine();
+                    System.out.print("Nuovo numero di pagine (corrente: " + rivista.getNumeroPagine() + "): ");
+                    int nuovePagineRivista = sc.nextInt();
+                    rivista.setNumeroPagine(nuovePagineRivista);
+                    sc.nextLine();
 
-                System.out.print("Nuovo numero di pagine (corrente: " + rivista.getNumeroPagine() + "): ");
-                int nuovePagineRivista = sc.nextInt();
-                rivista.setNumeroPagine(nuovePagineRivista);
-                sc.nextLine();
+                    System.out.print("Nuova periodicità (corrente: " + rivista.getPeriodicità() + "): ");
+                    String nuovaPeriodicita = sc.nextLine();
+                    try {
+                        PeriodicitàPubblicazione nuovaPeriodicitaRivista = PeriodicitàPubblicazione.valueOf(nuovaPeriodicita);
+                        rivista.setPeriodicità(nuovaPeriodicitaRivista);
+                    } catch (IllegalArgumentException e) {
+                        throw new periodicitàErrata("Periodicità non valida: " + nuovaPeriodicita);
+                    }
 
-                System.out.print("Nuova periodicità (corrente: " + rivista.getPeriodicità() + "): ");
-                String nuovaPeriodicita = sc.nextLine();
-                try {
-                    PeriodicitàPubblicazione nuovaPeriodicitaRivista = PeriodicitàPubblicazione.valueOf(nuovaPeriodicita);
-                    rivista.setPeriodicità(nuovaPeriodicitaRivista);
-                } catch (IllegalArgumentException e) {
-                    throw new periodicitàErrata("Periodicità non valida: " + nuovaPeriodicita);
-                }
-
-                log.info("Modifica della rivista avvenuta con successo!");
-                System.out.println("Rivista modificata: " + rivista);
-                break;
+                    log.info("Modifica della rivista avvenuta con successo!");
+                    System.out.println("Rivista modificata: " + rivista);
+                    break;
 
 
-            case Manga manga:
-                System.out.println("Elemento trovato: " + manga);
-                System.out.println("Modifica le proprietà della manga:");
+                case Manga manga:
+                    System.out.println("Elemento trovato: " + manga);
+                    System.out.println("Modifica le proprietà della manga:");
 
-                System.out.print("Nuovo titolo (corrente: " + manga.getTitolo() + "): ");
-                String nuovoTitoloManga = sc.nextLine();
-                manga.setTitolo(nuovoTitoloManga);
+                    System.out.print("Nuovo titolo (corrente: " + manga.getTitolo() + "): ");
+                    String nuovoTitoloManga = sc.nextLine();
+                    manga.setTitolo(nuovoTitoloManga);
 
-                System.out.print("Nuovo anno di pubblicazione (corrente: " + manga.getAnnoPubblicazione() + "): ");
-                int nuovoAnnoManga = sc.nextInt();
-                manga.setAnnoPubblicazione(nuovoAnnoManga);
-                sc.nextLine();
+                    System.out.print("Nuovo anno di pubblicazione (corrente: " + manga.getAnnoPubblicazione() + "): ");
+                    int nuovoAnnoManga = sc.nextInt();
+                    manga.setAnnoPubblicazione(nuovoAnnoManga);
+                    sc.nextLine();
 
-                System.out.print("Nuovo numero di pagine (corrente: " + manga.getNumeroPagine() + "): ");
-                int nuovePagineManga = sc.nextInt();
-                manga.setNumeroPagine(nuovePagineManga);
-                sc.nextLine();
+                    System.out.print("Nuovo numero di pagine (corrente: " + manga.getNumeroPagine() + "): ");
+                    int nuovePagineManga = sc.nextInt();
+                    manga.setNumeroPagine(nuovePagineManga);
+                    sc.nextLine();
 
-                System.out.print("Nuovo disegnatore (corrente: " + manga.getDisegnatore() + "): ");
-                String nuovoDisegnatoreManga = sc.nextLine();
-                manga.setDisegnatore(nuovoDisegnatoreManga);
+                    System.out.print("Nuovo disegnatore (corrente: " + manga.getDisegnatore() + "): ");
+                    String nuovoDisegnatoreManga = sc.nextLine();
+                    manga.setDisegnatore(nuovoDisegnatoreManga);
 
-                System.out.print("Nuova periodicità (corrente: " + manga.getPeriodicità() + "): ");
-                String nuovaPeriodicità = sc.nextLine();
-                try {
-                    PeriodicitàPubblicazione nuovaPeriodicitaEnum = PeriodicitàPubblicazione.valueOf(nuovaPeriodicità);
-                    manga.setPeriodicità(nuovaPeriodicitaEnum);
-                } catch (IllegalArgumentException e) {
-                    throw new periodicitàErrata("Periodicità non valida: " + nuovaPeriodicità);
-                }
+                    System.out.print("Nuova periodicità (corrente: " + manga.getPeriodicità() + "): ");
+                    String nuovaPeriodicità = sc.nextLine();
+                    try {
+                        PeriodicitàPubblicazione nuovaPeriodicitaEnum = PeriodicitàPubblicazione.valueOf(nuovaPeriodicità);
+                        manga.setPeriodicità(nuovaPeriodicitaEnum);
+                    } catch (IllegalArgumentException e) {
+                        throw new periodicitàErrata("Periodicità non valida: " + nuovaPeriodicità);
+                    }
 
-                log.info("Modifica del manga avvenuta con successo!");
-                System.out.println("Manga modificato: " + manga);
-                break;
+                    log.info("Modifica del manga avvenuta con successo!");
+                    System.out.println("Manga modificato: " + manga);
+                    break;
 
-            default:
-                throw new NoSuchElementException("Tipo di elemento non supportato per la modifica.");
+                default:
+                    throw new NoSuchElementException("Tipo di elemento non supportato per la modifica.");
+            }
+        } catch (elementoNonEsistente e) {
+            log.error(e.getMessage(), "Elemento non presente all'interno del catalogo");
+        } catch (periodicitàErrata e) {
+            log.error(e.getMessage(), "Periodicità errata");
+        } catch (Exception e) {
+            log.error("Errore durante la modifica: " + e.getMessage());
         }
 
     }
@@ -502,7 +506,7 @@ public class GestioneArchivio {
 
         // ALGO per stampare il totale di pagine dei manga
         int numPagManga = catalogoProdotti.stream()
-                .filter(Libri.class::isInstance)
+                .filter(Manga.class::isInstance)
                 .mapToInt(CatalogoBibliotecario::getNumeroPagine)
                 .sum();
         log.info("n° pagine totali dei manga in catalogo: " + numPagManga + " " + "pagine");
