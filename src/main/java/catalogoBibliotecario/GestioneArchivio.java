@@ -7,6 +7,15 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 
+// Chiedo scusa per il disordine nel codice però mi sono concentrato più sul capire quali strade potessi percorrere
+// per poter strutturare al meglio il codice e sul capire possibilmente piu concetti possibili, cosi
+// da assimilare il più possibile per riuscire poi ad avere una mente più aperta sulla manutenibilità e suddivisione dei macro blocchi di codice.
+// Ho capito che potevo gestire separando le due interfacce fra gestionale e ui dell' utente per snellire il Main, però non volevo rovinare il lavoro fatto prima della consegna finale.
+// PS --> ovviamente continuerò a usare questo progetto per fare varie prove.
+// Spero di aver fatto un minimo bene🤞 e le auguro una buona visione del mio codice...
+// BUON DIVERTIMENTO.  █ 😁 █
+
+
 public class GestioneArchivio {
 
     private static List<CatalogoBibliotecario> catalogoProdotti = new ArrayList<>();
@@ -143,11 +152,10 @@ public class GestioneArchivio {
         catalogoProdotti.add(new Manga(90, fakeData.book().title(), fakeData.number().numberBetween(1958, 2025), fakeData.number().numberBetween(30, 50), fakeData.book().author(), PeriodicitàPubblicazione.semestrale));
         catalogoProdotti.add(new Manga(91, fakeData.book().title(), fakeData.number().numberBetween(1958, 2025), fakeData.number().numberBetween(30, 50), fakeData.book().author(), PeriodicitàPubblicazione.mensile));
         catalogoProdotti.add(new Manga(92, fakeData.book().title(), fakeData.number().numberBetween(1958, 2025), fakeData.number().numberBetween(30, 50), fakeData.book().author(), PeriodicitàPubblicazione.mensile));
-
     }
 
 
-    public static void stampaCatalogo() {
+    static void stampaCatalogo() {
         if (catalogoProdotti.isEmpty()) {
             System.out.println("Mi dispiace, il tuo catalogo è vuoto !");
         } else {
@@ -156,7 +164,7 @@ public class GestioneArchivio {
     }
 
 
-    public static void aggiungiElementoSenzaDoppioni() {
+    static void aggiungiElementoSenzaDoppioni() {
         System.out.println("Cosa desideri aggiungere? (1)Libro  (2)Rivista  (3)Manga)");
         int scelta = sc.nextInt();
         sc.nextLine();
@@ -495,7 +503,6 @@ public class GestioneArchivio {
 
     public static void stampaStatistiche() {
 
-
         // ALGO per stampare il totale di pagine dei libri
         int numPagLibri = catalogoProdotti.stream()
                 .filter(Libri.class::isInstance)
@@ -568,8 +575,6 @@ public class GestioneArchivio {
             log.info("Numero di manga nella lista: " + totaleManga);
             listaManga.forEach(System.out::println);
         }
-
-
     }
 
 }
