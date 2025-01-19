@@ -17,6 +17,7 @@ public abstract class CatalogoBibliotecario {
         this.numeroPagine = numeroPagine;
     }
 
+
     public int getISBN() {
         return ISBN;
     }

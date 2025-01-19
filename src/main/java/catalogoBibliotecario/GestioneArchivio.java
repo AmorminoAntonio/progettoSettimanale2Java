@@ -5,16 +5,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 public class GestioneArchivio {
 
-
     private static List<CatalogoBibliotecario> catalogoProdotti = new ArrayList<>();
     private static List<Riviste> listaRiviste = new ArrayList<>();
     private static List<Libri> listaLibri = new ArrayList<>();
+    private static List<Manga> listaManga = new ArrayList<>();
     private static Faker fakeData = new Faker(new Locale("it-IT"));
     private static Scanner sc = new Scanner(System.in);
     private static Logger log = LoggerFactory.getLogger(GestioneArchivio.class);
@@ -24,113 +22,134 @@ public class GestioneArchivio {
 
 
         System.out.println("catalogo bibliotecario: ");
-        generaBooks();
-        generaRiviste();
+        generaCatalogo();
         stampaCatalogo();
 
+
         while (true) {
-            System.out.println("\nseleziona la funziona da svolgere: ");
-            System.out.println("1: cerca con ISBN,2: cerca tramite AUTORE,3: cerca tramite ANNO di PUBBLICAZIONE,4: aggiungi un elemento,5: rimuovi un elemento,6: vedi STATISTICHE");
-            System.out.println("7: vedi totale pagine libri e riviste, 8: vedi catalogo");
-            int scelta = sc.nextInt();
 
-            if (scelta == 0) {
-                System.out.println("programma terminato.");
-                sc.close();
-                break;
-            } else {
-                switch (scelta) {
-                    case 1:
-                        System.out.print("inserisci cod.ISBN: ");
-                        ricercaPerISBN(sc.nextInt());
-                        break;
-                    case 2:
-                        System.out.print("inserisci l'autore: ");
-                        sc.nextLine();
-                        ricercaPerAutore(sc.nextLine());
-                        break;
-                    case 3:
-                        System.out.print("inserisci l'anno di pubblicazione: ");
-                        ricercaPerPubblicazione(sc.nextInt());
-                        break;
-                    case 4:
-                        System.out.println("Vamos, crea l'elemento...");
-                        sc.nextLine();
-                        aggiungiElementoSenzaDuplicati();
-                        break;
-                    case 5:
-                        System.out.println("inserisci il cod.ISBN: ");
-                        rimuoviTramiteIsbn(sc.nextInt());
-                        aggiornaCatalogo();
-                        break;
-                    case 6:
-                        sc.nextLine();
-                        break;
-                    case 7:
-                        stampaNumeroPagine();
-                        break;
-                    case 8:
-                        stampaCatalogo();
-                        break;
-                    default:
-                        break;
+            System.out.println("\nSeleziona la funzione da svolgere: ");
+            System.out.println("(1): Ricerca per ISBN");
+            System.out.println("(2): Ricerca per Autore");
+            System.out.println("(3): Ricerca per Pubblicazione");
+            System.out.println("(4): Aggiungi elemento");
+            System.out.println("(5): Rimuovi elemento tramite ISBN");
+            System.out.println("(6): Modifica un elemento");
+            System.out.println("(7): Stampa statistiche (INFO) del catalogo");
+            System.out.println("(8): Stampa catalogo");
+            System.out.println("(9): Ricerca per disegnatore(MANGA)");
+            System.out.println("(0): Esci");
+            System.out.println("\n");
+            System.out.print("Selezione (inserisci di seguito) ▄ ▄ ▄ ");
+
+            try {
+                int scelta = sc.nextInt();
+                sc.nextLine();
+
+                // oppure potrei usare "\n" per consumare la riga residua.
+                // Evitando un errore e quindi un salto improvviso a una riga di comando non direttamente successiva.
+                // (gestisco l'errore cosi)
+                if (scelta == 0) {
+                    log.info("Programma Terminato con successo.");
+                    sc.close();
+                    break;
+                } else {
+                    switch (scelta) {
+                        case 1:
+                            ricercaPerISBN();
+                            break;
+                        case 2:
+                            ricercaPerAutore();
+                            break;
+                        case 3:
+                            ricercaPerPubblicazione();
+                            break;
+                        case 4:
+                            aggiungiElementoSenzaDoppioni();
+                            break;
+                        case 5:
+                            rimuoviTramiteIsbn();
+                            break;
+                        case 6:
+                            modificaElementoCatalogo();
+                            break;
+                        case 7:
+                            stampaStatistiche();
+                            break;
+                        case 8:
+                            stampaCatalogo();
+                            break;
+                        case 9:
+                            ricercaPerDisegnatore();
+                            break;
+                        default:
+                            break;
+                    }
                 }
+            } catch (InputMismatchException e) {
+                log.error(e.getMessage(), "ERRORE: mi hai inserito una stringa e non un numero.");
+                sc.nextLine();
+                // nel catch sto gestendo un valore immesso non corretto,
+                // con messaggio di risposta dell'errore commesso,
+                // poi successivamente un indicazione della condizione per una immissione del dato corretta.
+            } catch (NumberFormatException numberFormatException) {
+                log.error(numberFormatException.getMessage());
             }
+
         }
-
-
-
-/*
-        System.out.println("inerisci l'autore per ricercare: ");
-        ricercaPerAutore(sc.nextLine().toLowerCase().trim());
-
-
-        System.out.println("inserisci l' ID per ricercare: ");
-        ricercaPerISBN(sc.nextInt());
-
-
-        System.out.println("inserisci l'anno di pubblicazione per ricercare: ");
-        ricercaPerPubblicazione(sc.nextInt());*/
-
-
-        /*System.out.println("inserisci il cod ISBN per rimuovere l'elemento: ");
-        rimuoviTramiteIsbn(sc.nextInt());
-        stampaCatalogo();*/
-
-
     }
 
 
-    public static void generaBooks() {
-        Libri libro1 = new Libri(51, fakeData.book().title(), 1800, fakeData.number().numberBetween(30, 600), "Pepina lofinca", fakeData.book().genre());
-        Libri libro2 = new Libri(52, fakeData.book().title(), 1900, fakeData.number().numberBetween(30, 600), "Carciofo bredio", fakeData.book().genre());
-        Libri libro3 = new Libri(53, fakeData.book().title(), 2000, fakeData.number().numberBetween(30, 600), "Lorico caverna", fakeData.book().genre());
-        Libri libro4 = new Libri(54, fakeData.book().title(), 1500, fakeData.number().numberBetween(30, 600), "zio prepu", fakeData.book().genre());
-        Libri libro5 = new Libri(55, fakeData.book().title(), 1600, fakeData.number().numberBetween(30, 600), "thomas turbato", fakeData.book().genre());
-        Libri libro6 = new Libri(56, fakeData.book().title(), 1100, fakeData.number().numberBetween(30, 600), "nera pantera", fakeData.book().genre());
-        Libri libro7 = new Libri(57, fakeData.book().title(), 1700, fakeData.number().numberBetween(30, 600), "viola rosa", fakeData.book().genre());
-        Libri libro8 = new Libri(58, fakeData.book().title(), 1400, fakeData.number().numberBetween(30, 600), "chiara tenaglia", fakeData.book().genre());
+    // PROMEMORIA DELLE IMPLEMENTAZIONI:
+    // ALGO DELLE FUNZIONALITA':
+    // CREAZIONE = libri, riviste.  █(OK)
+    // AGGIUNTA IN CATALOGO = catalogo prodotti = (libri + riviste).  █(OK)
+    // ALGO DI RICERCA = per ISBN, per AUTORE, per ANNO DI PUBBLICAZIONE.  █(OK)
+    // ALGO DI AGGIUNTA PRODOTTO = suddiviso per tipo di prodotto fatta eccezione per prodotti già esistenti.  █(OK)
+    // ALGO DI RIMOZIONE PRODOTTO = prima ricerco il cod. ISBN, poi rimuovo il prodotto e poi stampo il nuovo catalogo.  █(OK)
+    // ALGO DI MODIFICA PRODOTTO = suddiviso per tipo di prodotto.  █(OK)
+    // ALGO DI STAMPA CATALOGO = ciclo di stampa del catalogo aggiornato.  █(OK)
+    // ALGO DI STAMPA STATISTICHE = totale libri, riviste + elem Max pagine + media pagine +
 
-        listaLibri.addAll(Arrays.asList(libro1, libro2, libro3, libro4, libro5, libro6, libro7, libro8));
+    public static void generaCatalogo() {
+        catalogoProdotti.add(new Libri(51, fakeData.book().title(), fakeData.number().numberBetween(1800, 2025), fakeData.number().numberBetween(30, 600), fakeData.book().author(), fakeData.book().genre()));
+        catalogoProdotti.add(new Libri(52, fakeData.book().title(), fakeData.number().numberBetween(1800, 2025), fakeData.number().numberBetween(30, 600), fakeData.book().author(), fakeData.book().genre()));
+        catalogoProdotti.add(new Libri(53, fakeData.book().title(), fakeData.number().numberBetween(1800, 2025), fakeData.number().numberBetween(30, 600), fakeData.book().author(), fakeData.book().genre()));
+        catalogoProdotti.add(new Libri(54, fakeData.book().title(), fakeData.number().numberBetween(1800, 2025), fakeData.number().numberBetween(30, 600), fakeData.book().author(), fakeData.book().genre()));
+        catalogoProdotti.add(new Libri(55, fakeData.book().title(), fakeData.number().numberBetween(1800, 2025), fakeData.number().numberBetween(30, 600), fakeData.book().author(), fakeData.book().genre()));
+        catalogoProdotti.add(new Libri(56, fakeData.book().title(), fakeData.number().numberBetween(1800, 2025), fakeData.number().numberBetween(30, 600), fakeData.book().author(), fakeData.book().genre()));
+        catalogoProdotti.add(new Libri(57, fakeData.book().title(), fakeData.number().numberBetween(1800, 2025), fakeData.number().numberBetween(30, 600), fakeData.book().author(), fakeData.book().genre()));
+        catalogoProdotti.add(new Libri(58, fakeData.book().title(), fakeData.number().numberBetween(1800, 2025), fakeData.number().numberBetween(30, 600), fakeData.book().author(), fakeData.book().genre()));
+        catalogoProdotti.add(new Libri(59, fakeData.book().title(), fakeData.number().numberBetween(1800, 2025), fakeData.number().numberBetween(30, 600), fakeData.book().author(), fakeData.book().genre()));
+        catalogoProdotti.add(new Libri(60, fakeData.book().title(), fakeData.number().numberBetween(1800, 2025), fakeData.number().numberBetween(30, 600), fakeData.book().author(), fakeData.book().genre()));
+        catalogoProdotti.add(new Riviste(61, fakeData.book().title(), fakeData.number().numberBetween(1800, 2025), fakeData.number().numberBetween(15, 30), PeriodicitàPubblicazione.mensile));
+        catalogoProdotti.add(new Riviste(62, fakeData.book().title(), fakeData.number().numberBetween(1800, 2025), fakeData.number().numberBetween(15, 30), PeriodicitàPubblicazione.mensile));
+        catalogoProdotti.add(new Riviste(63, fakeData.book().title(), fakeData.number().numberBetween(1800, 2025), fakeData.number().numberBetween(15, 30), PeriodicitàPubblicazione.mensile));
+        catalogoProdotti.add(new Riviste(64, fakeData.book().title(), fakeData.number().numberBetween(1800, 2025), fakeData.number().numberBetween(15, 30), PeriodicitàPubblicazione.mensile));
+        catalogoProdotti.add(new Riviste(65, fakeData.book().title(), fakeData.number().numberBetween(1800, 2025), fakeData.number().numberBetween(15, 30), PeriodicitàPubblicazione.mensile));
+        catalogoProdotti.add(new Riviste(66, fakeData.book().title(), fakeData.number().numberBetween(1800, 2025), fakeData.number().numberBetween(15, 30), PeriodicitàPubblicazione.mensile));
+        catalogoProdotti.add(new Riviste(67, fakeData.book().title(), fakeData.number().numberBetween(1800, 2025), fakeData.number().numberBetween(15, 30), PeriodicitàPubblicazione.mensile));
+        catalogoProdotti.add(new Riviste(68, fakeData.book().title(), fakeData.number().numberBetween(1800, 2025), fakeData.number().numberBetween(15, 30), PeriodicitàPubblicazione.mensile));
+        catalogoProdotti.add(new Riviste(69, fakeData.book().title(), fakeData.number().numberBetween(1800, 2025), fakeData.number().numberBetween(15, 30), PeriodicitàPubblicazione.mensile));
+        catalogoProdotti.add(new Riviste(70, fakeData.book().title(), fakeData.number().numberBetween(1800, 2025), fakeData.number().numberBetween(15, 30), PeriodicitàPubblicazione.mensile));
+        catalogoProdotti.add(new Manga(81, fakeData.book().title(), fakeData.number().numberBetween(1958, 2025), fakeData.number().numberBetween(30, 50), fakeData.book().author(), PeriodicitàPubblicazione.settimanale));
+        catalogoProdotti.add(new Manga(82, fakeData.book().title(), fakeData.number().numberBetween(1958, 2025), fakeData.number().numberBetween(30, 50), fakeData.book().author(), PeriodicitàPubblicazione.mensile));
+        catalogoProdotti.add(new Manga(83, fakeData.book().title(), fakeData.number().numberBetween(1958, 2025), fakeData.number().numberBetween(30, 50), fakeData.book().author(), PeriodicitàPubblicazione.mensile));
+        catalogoProdotti.add(new Manga(84, fakeData.book().title(), fakeData.number().numberBetween(1958, 2025), fakeData.number().numberBetween(30, 50), fakeData.book().author(), PeriodicitàPubblicazione.settimanale));
+        catalogoProdotti.add(new Manga(85, fakeData.book().title(), fakeData.number().numberBetween(1958, 2025), fakeData.number().numberBetween(30, 50), fakeData.book().author(), PeriodicitàPubblicazione.semestrale));
+        catalogoProdotti.add(new Manga(86, fakeData.book().title(), fakeData.number().numberBetween(1958, 2025), fakeData.number().numberBetween(30, 50), fakeData.book().author(), PeriodicitàPubblicazione.mensile));
+        catalogoProdotti.add(new Manga(86, fakeData.book().title(), fakeData.number().numberBetween(1958, 2025), fakeData.number().numberBetween(30, 50), fakeData.book().author(), PeriodicitàPubblicazione.semestrale));
+        catalogoProdotti.add(new Manga(87, fakeData.book().title(), fakeData.number().numberBetween(1958, 2025), fakeData.number().numberBetween(30, 50), fakeData.book().author(), PeriodicitàPubblicazione.settimanale));
+        catalogoProdotti.add(new Manga(88, fakeData.book().title(), fakeData.number().numberBetween(1958, 2025), fakeData.number().numberBetween(30, 50), fakeData.book().author(), PeriodicitàPubblicazione.settimanale));
+        catalogoProdotti.add(new Manga(89, fakeData.book().title(), fakeData.number().numberBetween(1958, 2025), fakeData.number().numberBetween(30, 50), fakeData.book().author(), PeriodicitàPubblicazione.settimanale));
+        catalogoProdotti.add(new Manga(90, fakeData.book().title(), fakeData.number().numberBetween(1958, 2025), fakeData.number().numberBetween(30, 50), fakeData.book().author(), PeriodicitàPubblicazione.semestrale));
+        catalogoProdotti.add(new Manga(91, fakeData.book().title(), fakeData.number().numberBetween(1958, 2025), fakeData.number().numberBetween(30, 50), fakeData.book().author(), PeriodicitàPubblicazione.mensile));
+        catalogoProdotti.add(new Manga(92, fakeData.book().title(), fakeData.number().numberBetween(1958, 2025), fakeData.number().numberBetween(30, 50), fakeData.book().author(), PeriodicitàPubblicazione.mensile));
+
     }
 
-
-    public static void generaRiviste() {
-        Riviste rivista1 = new Riviste(59, fakeData.book().title(), 2020, fakeData.number().numberBetween(15, 30), PeriodicitàPubblicazione.Mensile);
-        Riviste rivista2 = new Riviste(60, fakeData.book().title(), 2021, fakeData.number().numberBetween(15, 30), PeriodicitàPubblicazione.Mensile);
-        Riviste rivista3 = new Riviste(61, fakeData.book().title(), 2022, fakeData.number().numberBetween(15, 30), PeriodicitàPubblicazione.Mensile);
-        Riviste rivista4 = new Riviste(62, fakeData.book().title(), 2023, fakeData.number().numberBetween(15, 30), PeriodicitàPubblicazione.Mensile);
-        Riviste rivista5 = new Riviste(63, fakeData.book().title(), 2024, fakeData.number().numberBetween(15, 30), PeriodicitàPubblicazione.Mensile);
-        Riviste rivista6 = new Riviste(64, fakeData.book().title(), 2025, fakeData.number().numberBetween(15, 30), PeriodicitàPubblicazione.Mensile);
-        Riviste rivista7 = new Riviste(65, fakeData.book().title(), 2019, fakeData.number().numberBetween(15, 30), PeriodicitàPubblicazione.Mensile);
-        Riviste rivista8 = new Riviste(66, fakeData.book().title(), 2018, fakeData.number().numberBetween(15, 30), PeriodicitàPubblicazione.Mensile);
-
-        listaRiviste.addAll(Arrays.asList(rivista1, rivista2, rivista3, rivista4, rivista5, rivista6, rivista7, rivista8));
-    }
 
     public static void stampaCatalogo() {
-        catalogoProdotti.addAll(listaLibri);
-        catalogoProdotti.addAll(listaRiviste);
         if (catalogoProdotti.isEmpty()) {
             System.out.println("Mi dispiace, il tuo catalogo è vuoto !");
         } else {
@@ -139,110 +158,295 @@ public class GestioneArchivio {
     }
 
 
-    public static void aggiungiElementoSenzaDuplicati() {
-        System.out.println("Cosa desideri aggiungere? (1) Libro (2) Rivista");
-        int sceltaElementoDaCreare = sc.nextInt();
+    public static void aggiungiElementoSenzaDoppioni() {
+        System.out.println("Cosa desideri aggiungere? (1)Libro  (2)Rivista  (3)Manga)");
+        int scelta = sc.nextInt();
         sc.nextLine();
 
-        if (sceltaElementoDaCreare == 1) {
+        switch (scelta) {
+            case 1:
+                System.out.print("Inserisci ISBN: ");
+                int isbn = sc.nextInt();
+                sc.nextLine();
 
-            System.out.print("Inserisci ISBN: ");
-            int isbn = sc.nextInt();
-            sc.nextLine();
+                boolean libroGiàPresente = listaLibri.stream()
+                        .anyMatch(book -> book.getISBN() == isbn);
 
-            System.out.print("Inserisci Titolo: ");
-            String titolo = sc.nextLine();
+                if (libroGiàPresente) {
+                    try {
+                        throw new IsbnDuplicatoException("Il libro con ISBN " + isbn + " è già presente.");
+                    } catch (IsbnDuplicatoException e) {
+                        log.error(e.getMessage());
+                    }
+                } else {
+                    System.out.print("Inserisci Titolo: ");
+                    String titolo = sc.nextLine().toLowerCase();
 
-            System.out.print("Inserisci anno di pubblicazione: ");
-            int annoPubblicazione = sc.nextInt();
+                    System.out.print("Inserisci anno di pubblicazione: ");
+                    int annoPubblicazione = sc.nextInt();
 
-            System.out.print("Inserisci numero di pagine: ");
-            int numeroPagine = sc.nextInt();
-            sc.nextLine();
+                    System.out.print("Inserisci numero di pagine: ");
+                    int numeroPagine = sc.nextInt();
+                    sc.nextLine();
 
-            System.out.print("Inserisci autore: ");
-            String autore = sc.nextLine();
+                    System.out.print("Inserisci autore: ");
+                    String autore = sc.nextLine().toLowerCase();
 
-            System.out.print("Inserisci genere: ");
-            String genere = sc.nextLine();
+                    System.out.print("Inserisci genere: ");
+                    String genere = sc.nextLine().toLowerCase();
 
-            Libri libro = new Libri(isbn, titolo, annoPubblicazione, numeroPagine, autore, genere);
+                    Libri libro = new Libri(isbn, titolo, annoPubblicazione, numeroPagine, autore, genere);
+                    listaLibri.add(libro);
+                    System.out.println("Libro aggiunto: " + libro);
+                }
+                break;
 
+            case 2:
+                System.out.print("Inserisci ISBN: ");
+                int isbnRivista = sc.nextInt();
+                sc.nextLine();
 
-            boolean giàEsistente = listaLibri.stream()
-                    .anyMatch(book -> book.getISBN() == libro.getISBN());
+                boolean rivistaGiàPresente = listaRiviste.stream()
+                        .anyMatch(rivista -> rivista.getISBN() == isbnRivista);
 
-            if (giàEsistente) {
-                System.out.println("Libro con ISBN " + isbn + " già presente.");
-            } else {
-                listaLibri.add(libro);
-                System.out.println("Libro aggiunto: " + libro);
-            }
+                if (rivistaGiàPresente) {
+                    try {
+                        throw new IsbnDuplicatoException("La rivista con ISBN " + isbnRivista + " è già presente.");
+                    } catch (IsbnDuplicatoException e) {
+                        log.error(e.getMessage());
+                    }
+                } else {
+                    System.out.print("Inserisci Titolo: ");
+                    String titoloRivista = sc.nextLine().toLowerCase();
 
-        } else if (sceltaElementoDaCreare == 2) {
+                    System.out.print("Inserisci anno di pubblicazione: ");
+                    int annoPubblicazioneRivista = sc.nextInt();
 
-            System.out.print("Inserisci ISBN: ");
-            int isbn = sc.nextInt();
-            sc.nextLine();
+                    System.out.print("Inserisci numero di pagine: ");
+                    int numeroPagineRivista = sc.nextInt();
+                    sc.nextLine();
 
-            System.out.print("Inserisci Titolo: ");
-            String titolo = sc.nextLine();
+                    System.out.print("Inserisci periodicità (Settimanale, Mensile, Semestrale): ");
+                    String periodicita = sc.nextLine().toLowerCase();
 
-            System.out.print("Inserisci anno di pubblicazione: ");
-            int annoPubblicazione = sc.nextInt();
+                    try {
+                        PeriodicitàPubblicazione periodicitàEnum = PeriodicitàPubblicazione.valueOf(periodicita.toLowerCase());
+                        Riviste rivista = new Riviste(isbnRivista, titoloRivista, annoPubblicazioneRivista, numeroPagineRivista, periodicitàEnum);
+                        listaRiviste.add(rivista);
+                        System.out.println("Rivista aggiunta: " + rivista);
+                    } catch (IllegalArgumentException e) {
+                        log.error("Periodicità di pubblicazione della rivista non valida. Le opzioni disponibili sono: Settimanale, Mensile, Semestrale.");
+                    }
+                }
+                break;
 
-            System.out.print("Inserisci numero di pagine: ");
-            int numeroPagine = sc.nextInt();
-            sc.nextLine();
+            case 3:
+                System.out.print("Inserisci ISBN: ");
+                int isbnManga = sc.nextInt();
+                sc.nextLine();
 
-            System.out.print("Inserisci periodicità (Settimanale, Mensile, Semestrale): ");
-            String periodicita = sc.nextLine();
-            PeriodicitàPubblicazione periodicità = PeriodicitàPubblicazione.valueOf(periodicita);
+                boolean mangaGiàPresente = listaManga.stream()
+                        .anyMatch(manga -> manga.getISBN() == isbnManga);
 
-            Riviste rivista = new Riviste(isbn, titolo, annoPubblicazione, numeroPagine, periodicità);
+                if (mangaGiàPresente) {
+                    try {
+                        throw new IsbnDuplicatoException("La rivista con ISBN " + isbnManga + " è già presente.");
+                    } catch (IsbnDuplicatoException e) {
+                        log.error(e.getMessage());
+                    }
+                } else {
+                    System.out.print("Inserisci Titolo: ");
+                    String titoloManga = sc.nextLine().toLowerCase();
 
+                    System.out.print("Inserisci anno di pubblicazione: ");
+                    int annoPubblicazioneManga = sc.nextInt();
 
-            boolean giàEsistente = listaRiviste.stream()
-                    .anyMatch(riviste -> riviste.getISBN() == rivista.getISBN());
+                    System.out.print("Inserisci numero di pagine: ");
+                    int numeroPagineManga = sc.nextInt();
+                    sc.nextLine();
 
-            if (giàEsistente) {
-                System.out.println("Rivista con ISBN " + isbn + " già presente.");
-            } else {
-                listaRiviste.add(rivista);
-                System.out.println("Rivista aggiunta: " + rivista);
-            }
+                    System.out.print("inserisci il disegnatore: ");
+                    String disegnatore = sc.nextLine().toLowerCase();
 
-        } else {
-            System.out.println("Scelta non valida.");
+                    System.out.print("Inserisci periodicità (Settimanale, Mensile, Semestrale): ");
+                    String periodicitaManga = sc.nextLine().toLowerCase();
+
+                    try {
+                        PeriodicitàPubblicazione periodicitàMangaEnum = PeriodicitàPubblicazione.valueOf(periodicitaManga.toLowerCase());
+                        Manga manga = new Manga(isbnManga, titoloManga, annoPubblicazioneManga, numeroPagineManga, disegnatore, periodicitàMangaEnum);
+                        listaManga.add(manga);
+                        System.out.println("Manga aggiunto: " + manga);
+
+                    } catch (IllegalArgumentException e) {
+                        log.error("Periodicità di pubblicazione del manga non valida. Le opzioni disponibili sono: Settimanale, Mensile, Semestrale.");
+                    }
+                }
+                break;
+
+            default:
+                log.error("Scelta non valida.");
+                break;
         }
     }
 
-    public static void ricercaPerPubblicazione(int annoDiPubblicazione) {
-        catalogoProdotti.stream()
-                .filter(catalogoBibliotecario -> catalogoBibliotecario.getAnnoPubblicazione() == annoDiPubblicazione)
-                .peek(elemCatalogo -> System.out.println("Prodotto trovato: " + elemCatalogo))
-                .findFirst()
-                .orElseGet(() -> {
-                    System.out.println("Nessun prodotto trovato con anno di pubblicazione " + annoDiPubblicazione);
-                    return null;
-                });
+
+    public static void modificaElementoCatalogo() {
+        System.out.print("Inserisci l'ISBN dell'elemento da modificare: ");
+        int IsbnCercato = sc.nextInt();
+        sc.nextLine();
+
+        Optional<CatalogoBibliotecario> elementoDaModificare = catalogoProdotti.stream()
+                .filter(catalogoBibliotecario -> catalogoBibliotecario.getISBN() == IsbnCercato)
+                .findFirst();
+
+        CatalogoBibliotecario prodottoModificato = elementoDaModificare
+                .orElseThrow(() -> new elementoNonEsistente("Nessun prodotto trovato con ISBN " + IsbnCercato));
+
+        switch (prodottoModificato) {
+            case Libri libro:
+                System.out.println("Elemento trovato: " + libro);
+                System.out.println("Modifica le proprietà del libro:");
+
+                System.out.print("Nuovo titolo (corrente: " + libro.getTitolo() + "): ");
+                String nuovoTitolo = sc.nextLine();
+                libro.setTitolo(nuovoTitolo);
+
+                System.out.print("Nuovo anno di pubblicazione (corrente: " + libro.getAnnoPubblicazione() + "): ");
+                int nuovoAnno = sc.nextInt();
+                libro.setAnnoPubblicazione(nuovoAnno);
+                sc.nextLine();
+
+                System.out.print("Nuovo numero di pagine (corrente: " + libro.getNumeroPagine() + "): ");
+                int nuovePagine = sc.nextInt();
+                libro.setNumeroPagine(nuovePagine);
+                sc.nextLine();
+
+                System.out.print("Nuovo autore (corrente: " + libro.getAutore() + "): ");
+                String nuovoAutore = sc.nextLine();
+                libro.setAutore(nuovoAutore);
+
+                System.out.print("Nuovo genere (corrente: " + libro.getGenere() + "): ");
+                String nuovoGenere = sc.nextLine();
+                libro.setGenere(nuovoGenere);
+
+                log.info("Modifica del libro avvenuta con successo!");
+                System.out.println("Libro modificato: " + libro);
+                break;
+
+            case Riviste rivista:
+                System.out.println("Elemento trovato: " + rivista);
+                System.out.println("Modifica le proprietà della rivista:");
+
+                System.out.print("Nuovo titolo (corrente: " + rivista.getTitolo() + "): ");
+                String nuovoTitoloRivista = sc.nextLine();
+                rivista.setTitolo(nuovoTitoloRivista);
+
+                System.out.print("Nuovo anno di pubblicazione (corrente: " + rivista.getAnnoPubblicazione() + "): ");
+                int nuovoAnnoRivista = sc.nextInt();
+                rivista.setAnnoPubblicazione(nuovoAnnoRivista);
+                sc.nextLine();
+
+                System.out.print("Nuovo numero di pagine (corrente: " + rivista.getNumeroPagine() + "): ");
+                int nuovePagineRivista = sc.nextInt();
+                rivista.setNumeroPagine(nuovePagineRivista);
+                sc.nextLine();
+
+                System.out.print("Nuova periodicità (corrente: " + rivista.getPeriodicità() + "): ");
+                String nuovaPeriodicita = sc.nextLine();
+                try {
+                    PeriodicitàPubblicazione nuovaPeriodicitaRivista = PeriodicitàPubblicazione.valueOf(nuovaPeriodicita);
+                    rivista.setPeriodicità(nuovaPeriodicitaRivista);
+                } catch (IllegalArgumentException e) {
+                    throw new periodicitàErrata("Periodicità non valida: " + nuovaPeriodicita);
+                }
+
+                log.info("Modifica della rivista avvenuta con successo!");
+                System.out.println("Rivista modificata: " + rivista);
+                break;
+
+
+            case Manga manga:
+                System.out.println("Elemento trovato: " + manga);
+                System.out.println("Modifica le proprietà della manga:");
+
+                System.out.print("Nuovo titolo (corrente: " + manga.getTitolo() + "): ");
+                String nuovoTitoloManga = sc.nextLine();
+                manga.setTitolo(nuovoTitoloManga);
+
+                System.out.print("Nuovo anno di pubblicazione (corrente: " + manga.getAnnoPubblicazione() + "): ");
+                int nuovoAnnoManga = sc.nextInt();
+                manga.setAnnoPubblicazione(nuovoAnnoManga);
+                sc.nextLine();
+
+                System.out.print("Nuovo numero di pagine (corrente: " + manga.getNumeroPagine() + "): ");
+                int nuovePagineManga = sc.nextInt();
+                manga.setNumeroPagine(nuovePagineManga);
+                sc.nextLine();
+
+                System.out.print("Nuovo disegnatore (corrente: " + manga.getDisegnatore() + "): ");
+                String nuovoDisegnatoreManga = sc.nextLine();
+                manga.setDisegnatore(nuovoDisegnatoreManga);
+
+                System.out.print("Nuova periodicità (corrente: " + manga.getPeriodicità() + "): ");
+                String nuovaPeriodicità = sc.nextLine();
+                try {
+                    PeriodicitàPubblicazione nuovaPeriodicitaEnum = PeriodicitàPubblicazione.valueOf(nuovaPeriodicità);
+                    manga.setPeriodicità(nuovaPeriodicitaEnum);
+                } catch (IllegalArgumentException e) {
+                    throw new periodicitàErrata("Periodicità non valida: " + nuovaPeriodicità);
+                }
+
+                log.info("Modifica del manga avvenuta con successo!");
+                System.out.println("Manga modificato: " + manga);
+                break;
+
+            default:
+                throw new NoSuchElementException("Tipo di elemento non supportato per la modifica.");
+        }
+
     }
 
 
-    public static void ricercaPerISBN(int isbn) {
+    public static void ricercaPerPubblicazione() {
+        System.out.print("inserisci l'anno di pubblicazione: ");
+        int annoPubblicazione = sc.nextInt();
         catalogoProdotti.stream()
-                .filter(catalogoBibliotecario -> catalogoBibliotecario.getISBN() == isbn)
+                .filter(catalogoBibliotecario -> catalogoBibliotecario.getAnnoPubblicazione() == annoPubblicazione)
                 .findFirst()
                 .ifPresentOrElse(
-                        catalogoBibliotecario -> System.out.println("prodotto trovato: " + catalogoBibliotecario),
-                        () -> System.out.println("Nessun libro trovato con ISBN " + isbn)
+                        elemCatalogo -> System.out.println("Prodotto trovato: " + elemCatalogo),
+                        () -> System.out.println("Nessun prodotto trovato con anno di pubblicazione " + annoPubblicazione)
                 );
     }
 
 
-    public static void ricercaPerAutore(String autore) {
-        listaLibri.stream()
-                .filter(libro -> libro.getAutore().equalsIgnoreCase(autore))
+    public static void ricercaPerISBN() {
+        try {
+            System.out.print("inserisci cod.ISBN: ");
+            int isbn = sc.nextInt();
+            catalogoProdotti.stream()
+                    .filter(catalogoBibliotecario -> catalogoBibliotecario.getISBN() == isbn)
+                    .findFirst()
+                    .ifPresent(prodottoCercato -> System.out.println("prodotto trovato: " + prodottoCercato)
+                    );
+        } catch (IsbnNonValidoException incorrect) {
+            log.error(incorrect.getMessage(), "il codice Isbn inserito non è CORRETTO.");
+        } catch (NumberFormatException n) {
+            log.error(n.getMessage(), "l' elemento non trovato. ");
+        } catch (InputMismatchException e) {
+            log.error("Erroe: hai inserito un formato sbagliato per il cod. Isbn");
+        }
+    }
+
+
+    public static void ricercaPerAutore() {
+        System.out.print("Inserisci il nome dell'autore: ");
+        String autore = sc.nextLine().trim().toLowerCase();
+
+        catalogoProdotti.stream()
+                .filter(prodotto -> prodotto instanceof Libri)
+                .map(prodotto -> (Libri) prodotto)
+                .filter(libro -> libro.getAutore() != null && libro.getAutore().equalsIgnoreCase(autore))
                 .findFirst()
                 .ifPresentOrElse(
                         libro -> System.out.println("Libro trovato: " + libro),
@@ -250,45 +454,118 @@ public class GestioneArchivio {
                 );
     }
 
-    //DA RIVEDERE PERCHE' MI DUPLICA LA LISTA CATALOGO PRODOTTI
-    public static void rimuoviTramiteIsbn(int codiceProd) {
+
+    public static void ricercaPerDisegnatore() {
+        System.out.print("Inserisci il nome del disegnatore: ");
+        String disegnatore = sc.nextLine().trim().toLowerCase();
+
+        catalogoProdotti.stream()
+                .filter(prodotto -> prodotto instanceof Manga)
+                .map(prodotto -> (Manga) prodotto)
+                .filter(manga -> manga.getDisegnatore() != null && manga.getDisegnatore().equalsIgnoreCase(disegnatore))
+                .findFirst()
+                .ifPresentOrElse(
+                        manga -> System.out.println("Manga trovato: " + manga),
+                        () -> System.out.println("Nessun manga trovato per il disegnatore: " + disegnatore)
+                );
+    }
+
+
+    //DA RIVEDERE PERCHE' MI DUPLICA LA LISTA CATALOGO PRODOTTI ---> █(OK)
+    public static void rimuoviTramiteIsbn() {
+        System.out.print("inserisci il cod.ISBN: ");
+        int codiceProd = sc.nextInt();
         catalogoProdotti.stream()
                 .filter(catalogoBibliotecario -> catalogoBibliotecario.getISBN() == codiceProd)
                 .findFirst()
                 .ifPresentOrElse(
-                        elem -> {
-                            catalogoProdotti.removeIf(p -> elem.getISBN() == codiceProd);
-                            System.out.println("Elemento con ISBN " + codiceProd + " rimosso con successo.");
+                        catalogoBibliotecario -> {
+                            catalogoProdotti.removeIf(prodotto -> prodotto.getISBN() == codiceProd);
+                            System.out.println("il Prodotto con ISBN " + codiceProd + " è stato rimosso con successo.");
+                            catalogoProdotti.forEach(System.out::println);
                         },
-                        () -> System.out.println("Rimozione dell'elemento con codice ISBN " + codiceProd + " non avvenuta correttamente !")
+                        () -> System.out.println("Rimozione dell'elemento con codice ISBN " + codiceProd + " non avvenuta correttamente!")
                 );
-        aggiornaCatalogo();
     }
 
-    public static void aggiornaCatalogo() {
-        catalogoProdotti = Stream.concat(listaLibri.stream(), listaRiviste.stream())
-                .collect(Collectors.toList());
-        catalogoProdotti.forEach(System.out::println);
-    }
 
-    public static void sommaPagineLibri() {
-        int sum = listaLibri.stream()
-                .mapToInt(Libri::getNumeroPagine)
+    public static void stampaStatistiche() {
+
+
+        // ALGO per stampare il totale di pagine dei libri
+        int numPagLibri = catalogoProdotti.stream()
+                .filter(Libri.class::isInstance)
+                .mapToInt(CatalogoBibliotecario::getNumeroPagine)
                 .sum();
-        System.out.println("n° pagine totali dei libri in catalogo: " + sum + " " + "pagine");
-    }
+        log.info("n° pagine totali dei libri in catalogo: " + numPagLibri + " " + "pagine");
 
-    public static void sommaPagineRiviste() {
-        int sum = listaRiviste.stream()
-                .mapToInt(Riviste::getNumeroPagine)
+
+        // ALGO per stampare il totale di pagine dei manga
+        int numPagManga = catalogoProdotti.stream()
+                .filter(Libri.class::isInstance)
+                .mapToInt(CatalogoBibliotecario::getNumeroPagine)
                 .sum();
-        System.out.println("n° pagine totali delle riviste in catalogo: " + sum + " " + "pagine");
-    }
+        log.info("n° pagine totali dei manga in catalogo: " + numPagManga + " " + "pagine");
 
-    public static void stampaNumeroPagine() {
-        sommaPagineLibri();
-        sommaPagineRiviste();
-    }
 
+        // ALGO per stampare il totale di pagine delle riviste
+        int numPagRiviste = catalogoProdotti.stream()
+                .filter(Riviste.class::isInstance)
+                .mapToInt(CatalogoBibliotecario::getNumeroPagine)
+                .sum();
+        log.info("n° pagine totali delle riviste in catalogo: " + numPagRiviste + " " + "pagine");
+
+
+        // ALGO per stampare il numero medio di pagine per prodotto nel catalogo
+        OptionalDouble mediaPagine = catalogoProdotti.stream()
+                .mapToInt(CatalogoBibliotecario::getNumeroPagine)
+                .average();
+        log.info("media delle pagine per prodotto in catalogo; " + mediaPagine);
+
+
+        // ALGO per stampare il prodotto con piu pagine.
+        CatalogoBibliotecario prodottoConMaxPagine = catalogoProdotti.stream()
+                .max(Comparator.comparingInt(CatalogoBibliotecario::getNumeroPagine))
+                .orElseThrow(NoSuchElementException::new);
+        log.info("Elemento con più pagine in catalogo: " + prodottoConMaxPagine);
+
+
+        // ALGO per stampare il totale di libri nel catalogo
+        long totaleLibri = catalogoProdotti.stream()
+                .filter(Libri.class::isInstance)
+                .count();
+        if (listaLibri == null) {
+            log.error("Errore! La lista libri è vuota");
+        } else {
+            log.info("Numero di libri nella lista: " + totaleLibri);
+            listaLibri.forEach(System.out::println);
+        }
+
+
+        // ALGO per stampare il totale delle riviste nel catalogo
+        long totaleRiviste = catalogoProdotti.stream()
+                .filter(Riviste.class::isInstance)
+                .count();
+        if (listaRiviste == null) {
+            log.error("errore ! - la tua lista riviste è vuota");
+        } else {
+            log.info("Numero di riviste nella lista: " + totaleRiviste);
+            listaRiviste.forEach(System.out::println);
+        }
+
+
+        // ALGO per stampare il totale delle riviste nel catalogo
+        long totaleManga = catalogoProdotti.stream()
+                .filter(Manga.class::isInstance)
+                .count();
+        if (listaManga == null) {
+            log.error("errore ! - la tua lista manga è vuota");
+        } else {
+            log.info("Numero di manga nella lista: " + totaleManga);
+            listaManga.forEach(System.out::println);
+        }
+
+
+    }
 
 }
